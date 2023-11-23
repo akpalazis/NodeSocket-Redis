@@ -76,8 +76,17 @@ io.on('connection', socket => {
 subredisClient.on('message', (channel, message) => {
   if (channel === 'redisMessage') {
     const data = JSON.parse(message);
+    console.log(data)
     if (data.toServer === "main") {
       io.emit('main',data)
+    }
+    if (data.user in users){
+      const currentSocket = users[data.user]
+      currentSocket.emit('private',data)
+    }
+    if (data.toServer in users){
+      const currentSocket = users[data.toServer]
+      currentSocket.emit('private',data)
     }
   }
   if (channel === 'redisUsers'){

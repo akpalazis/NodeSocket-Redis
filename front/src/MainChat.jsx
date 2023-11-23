@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './Chat.css';
+import SideBar from "./SideBar";
+import PrivateChat from "./PrivateChat";
 
 function MainChat({username,socket}) {
   const [serverNumber, setServerNumber] = useState('');
   const [inputText, setInputText] = useState('');
   const [displayTexts, setDisplayTexts] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
+  const [sideMenu,setSideMenu] = useState(true)
+  const [privateChatUser, setPrivateChatUser] = useState(null);
+  const [privateChatInput, setPrivateChatInput] = useState('');
+  const [privateChatMessages, setPrivateChatMessages] = useState([]);
 
   useEffect(() => {
 
@@ -29,6 +35,20 @@ function MainChat({username,socket}) {
 
   }, [displayTexts]);
 
+  useEffect(() => {
+    const handlePrivateMessage = (messages) => {
+      setPrivateChatMessages([...privateChatMessages, messages]);
+    };
+
+    socket.on('private', handlePrivateMessage);
+
+    return () => {
+      // Clean up the event listener when the component is unmounted
+      socket.off('private', handlePrivateMessage);
+    };
+  }, [privateChatMessages, socket]);
+
+
   const handleChange = (event) => {
     setInputText(event.target.value);
   };
@@ -45,18 +65,32 @@ function MainChat({username,socket}) {
     }
   };
 
+  const sendPrivateMessage = () => {
+    if (privateChatInput.trim() !== '') {
+      const message = {
+        message: privateChatInput.trim(),
+        user: username,
+        toServer: privateChatUser,
+      };
+      socket.emit('sendMessage', message);
+      setPrivateChatInput('');
+    }
+  };
+
   return (
     <div className="app-container">
-      <div className="sidebar">
-        <h3>Connected Users</h3>
-        <ul>
-          {connectedUsers.map((user) => (
-            <li key={user}>{user}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="App">
+      {sideMenu? (<SideBar connectedUsers={connectedUsers} setPrivateChatUser={setPrivateChatUser} setSideMenu={setSideMenu}/>)
+      :
+        (<PrivateChat username={username}
+                      privateChatUser={privateChatUser}
+                      setSideMenu={setSideMenu}
+                      sendPrivateMessage={sendPrivateMessage}
+                      privateChatInput={privateChatInput}
+                      setPrivateChatInput={setPrivateChatInput}
+                      privateChatMessages={privateChatMessages}
+                      />)
+      }
+    <div className="App">
         <h1>Chat Room</h1>
         <h5> Server: {serverNumber}</h5>
         <h5> Username: {username}</h5>
@@ -79,7 +113,7 @@ function MainChat({username,socket}) {
           <button onClick={handleDisplay}>Send Text</button>
         </div>
       </div>
-    </div>
+      </div>
   );
 }
 
