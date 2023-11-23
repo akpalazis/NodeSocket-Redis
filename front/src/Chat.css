@@ -1,11 +1,17 @@
 .App {
   text-align: center;
-  width: 100vw;
+  width: 80vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
 }
+.currentUserMessage {
+  color: blue; /* Change this to your desired color */
+}
 
+.otherUserMessage {
+  color: green; /* Change this to your desired color */
+}
 .fullscreen-container {
   flex: 1;
   width: 100%;
@@ -40,3 +46,15 @@ button {
   color: white;
   cursor: pointer;
 }
+
+.app-container {
+  display: flex;
+}
+
+.sidebar {
+  width: 200px;
+  padding: 20px;
+  background-color: #f0f0f0;
+}
+
+/* Add any other styles as needed */
