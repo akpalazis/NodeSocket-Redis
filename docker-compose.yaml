@@ -1,0 +1,97 @@
+version: '3'
+
+networks:
+  traefik:
+
+services:
+  front:
+    build:
+      context: front
+      dockerfile: ./Dockerfile
+    environment:
+      - VITE_PORT=3000
+    ports:
+      - "3000:3000"
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.front.rule=Host(`localhost`) && PathPrefix(`/home`)"
+      - "traefik.http.routers.front.entrypoints=web"
+      - "traefik.http.services.front.loadbalancer.server.port=3000"
+      - "traefik.docker.network=traefik"
+
+  server1:
+    build:
+      context: server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    environment:
+      - NAME=1
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server1.rule=Host(`localhost`) && PathPrefix(`/socket.io`)"
+      - "traefik.docker.network=traefik"
+
+  server2:
+    build:
+      context: server
+    ports:
+      - "5001:5000"
+    depends_on:
+      - redis
+    environment:
+      - NAME=2
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server2.rule=Host(`localhost`) && PathPrefix(`/socket.io`)"
+      - "traefik.docker.network=traefik"
+
+  server3:
+    build:
+      context: server
+    ports:
+      - "5002:5000"
+    depends_on:
+      - redis
+    environment:
+      - NAME=3
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server3.rule=Host(`localhost`) && PathPrefix(`/socket.io`)"
+      - "traefik.docker.network=traefik"
+
+  redis:
+    image: redis:alpine
+    expose:
+      - "6379"
+    networks:
+      - traefik
+
+  traefik:
+    image: traefik:v2.5
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.web.address=:80"
+      - "--accesslog=true"
+
+    ports:
+      - "80:80"
+      - "8080:8080" # Traefik dashboard, optional
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=my-network"
+
