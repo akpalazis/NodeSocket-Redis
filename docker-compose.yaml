@@ -16,10 +16,14 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.front.rule=Host(`localhost`) && PathPrefix(`/home`)"
+      - "traefik.http.routers.front.rule=PathPrefix(`/home`)"
       - "traefik.http.routers.front.entrypoints=web"
       - "traefik.http.services.front.loadbalancer.server.port=3000"
       - "traefik.docker.network=traefik"
+    depends_on:
+      - redis
+      - traefik
+      - server1
 
   server1:
     build:
@@ -28,13 +32,14 @@ services:
       - "5000:5000"
     depends_on:
       - redis
+      - traefik
     environment:
       - NAME=1
     networks:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.server1.rule=Host(`localhost`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.server1.rule=PathPrefix(`/socket.io`)"
       - "traefik.docker.network=traefik"
 
   server2:
@@ -50,7 +55,7 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.server2.rule=Host(`localhost`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.server2.rule=PathPrefix(`/socket.io`)"
       - "traefik.docker.network=traefik"
 
   server3:
@@ -66,7 +71,7 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.server3.rule=Host(`localhost`) && PathPrefix(`/socket.io`)"
+      - "traefik.http.routers.server3.rule=PathPrefix(`/socket.io`)"
       - "traefik.docker.network=traefik"
 
   redis:
@@ -93,5 +98,5 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=my-network"
+      - "traefik.docker.network=traefik"
 

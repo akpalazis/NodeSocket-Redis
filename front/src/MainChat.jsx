@@ -3,8 +3,7 @@ import './Chat.css';
 import SideBar from "./SideBar";
 import PrivateChat from "./PrivateChat";
 
-function MainChat({username,socket}) {
-  const [serverNumber, setServerNumber] = useState('');
+function MainChat({username,socket,serverNumber}) {
   const [inputText, setInputText] = useState('');
   const [displayTexts, setDisplayTexts] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
@@ -15,9 +14,7 @@ function MainChat({username,socket}) {
 
   useEffect(() => {
 
-    socket.on('serverName', (data) => {
-      setServerNumber(data);
-    });
+
 
     socket.on('users', (data) => {
     if (data.includes(username)) {
