@@ -1,2 +1,2 @@
 .gitignore
-server/node_modules/@redis/
+server/node_modules/*
